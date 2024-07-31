@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { View, Text } from 'react-native';
 import Button from './components/Button';
 import Display from './components/Display';
 import History from './components/History';
@@ -11,22 +11,44 @@ export default function App() {
   const [firstValue, setFirstValue] = useState('');
   const [secondValue, setSecondValue] = useState('');
   const [history, setHistory] = useState([]);
+  const [inputString, setInputString] = useState('');
 
   const handlePress = (value) => {
     if (['+', '-', '*', '/'].includes(value)) {
-      setOperator(value);
-      setFirstValue(displayValue);
-      setDisplayValue('0');
+      if (operator) {
+        // If there's already an operator, replace it with the new one
+        const newInputString = inputString.slice(0, -1) + value;
+        setOperator(value);
+        setInputString(newInputString);
+      } else {
+        setOperator(value);
+        setFirstValue(displayValue);
+        setInputString(inputString + value);
+      }
+      setDisplayValue(displayValue);
     } else if (value === '=') {
-      const result = eval(`${firstValue} ${operator} ${displayValue}`);
-      const calculation = `${firstValue} ${operator} ${displayValue} = ${result}`;
-      setHistory([calculation, ...history]);
-      setDisplayValue(result.toString());
-      setOperator(null);
-      setFirstValue('');
-      setSecondValue('');
+      if (firstValue && operator) {
+        const result = eval(`${firstValue} ${operator} ${displayValue}`);
+        const calculation = `${firstValue} ${operator} ${displayValue} = ${result}`;
+        setHistory([calculation, ...history]);
+        setDisplayValue(result.toString());
+        setOperator(null);
+        setFirstValue('');
+        setSecondValue('');
+        setInputString(result.toString());
+      }
     } else {
-      setDisplayValue(displayValue === '0' ? value : displayValue + value);
+      if (displayValue === '0' || operator && secondValue === '') {
+        setDisplayValue(value);
+      } else {
+        setDisplayValue(displayValue + value);
+      }
+      if (operator) {
+        setSecondValue(secondValue + value);
+      } else {
+        setFirstValue(firstValue + value);
+      }
+      setInputString(inputString + value);
     }
   };
 
@@ -35,12 +57,13 @@ export default function App() {
     setOperator(null);
     setFirstValue('');
     setSecondValue('');
+    setInputString('');
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.appTitle}>NumCruncher</Text>
-      <Display value={displayValue} />
+      <Display value={inputString || displayValue} />
       <History history={history} />
       <View style={styles.buttonRow}>
         <Button label="7" onPress={() => handlePress('7')} />
