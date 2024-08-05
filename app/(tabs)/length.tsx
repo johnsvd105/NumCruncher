@@ -1,73 +1,106 @@
-import { View, Text,TextInput,Button, StyleSheet, ScrollView, Pressable } from 'react-native'
+import { View, Text,TextInput, StyleSheet, ScrollView, Pressable } from 'react-native'
 import React from 'react'
+import { useState } from 'react'
+import { formatValue } from '../_utils/general'
 
-const Length = () => {
+
+const Length= () => {
+
+  const defaultValues = {
+    centimeter: '',
+    decimeter: '',
+    feet: '',
+    inch: '',
+    kilometer: '',
+    yard: '',
+    meter: '',
+    mile: '',
+  }
+
+  const conversions = {
+    centimeter: 'decimeter/10 feet/30.48 inch/2.54 kilometer/100000 yard/91.44 meter/100 mile/160934.4',
+    decimeter: 'centimeter*10 feet/3.048 inch*3.937 kilometer/0.0001 yard/9.144 meter/10 mile/16093.44',
+    feet: '',
+    inch: '',
+    kilometer: '',
+    yard: '',
+    meter: '',
+    mile: '',
+  }
+
+  const [values, setValues] = useState(defaultValues);
+  const convertValues = (fieldName, value) => {
+    let newValues = { ...values, [fieldName]: value };
+
+    if (conversions[fieldName]) {
+      const parts = conversions[fieldName].split(' ');
+
+      parts.forEach(rule => {
+
+        const match = rule.match(/(\w+)([/*])(\d+(\.\d+)?)/);
+
+        if (match) {
+          const unit = match[1].trim();
+          const operator = match[2]
+          const number = parseFloat(match[3]);
+
+          if (unit && !isNaN(number)) {
+            let result;
+            if (operator === '/') {
+              result = (value / number)
+            } 
+            else if (operator === '*') {
+              result = (value * number)
+            }
+            newValues[unit] = formatValue(result);
+          }
+        }
+      });
+    }
+    setValues(newValues);
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-    <Text style={styles.title}>Length Converter</Text>
+      <Text style={styles.title}>Length Converter</Text>
 
-    <View style={styles.converterRow}>
-      <Text style={styles.label}>Centimeter</Text>
-      <TextInput style={styles.input} keyboardType="numeric" />
-      <Text style={styles.shortForm}>cm</Text>
-    </View>
+      {Object.keys(values).map((key) => (
+        <View style={styles.converterRow} key={key}>
+          <Text style={styles.label}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType='numeric'
+            placeholder='0'
+            placeholderTextColor={'#bbb'}
+            value={values[key]}
+            onChangeText={(text) => convertValues(key, text)}
+            onBlur={() => convertValues(key, values[key])}
+          />
+          <Text style={styles.shortForm}>
+            {key === 'centimeter' && 'cm'}
+            {key === 'decimeter' && 'dm'}
+            {key === 'feet' && 'ft'}
+            {key === 'inch' && 'in'}
+            {key === 'kilometer' && 'km'}
+            {key === 'yard' && 'yd'}
+            {key === 'meter' && 'm'}
+            {key === 'mile' && 'mi'}
+          </Text>
+        </View>
+      ))}
 
-    <View style={styles.converterRow}>
-      <Text style={styles.label}>Decimeter</Text>
-      <TextInput style={styles.input} keyboardType="numeric" />
-      <Text style={styles.shortForm}>dm</Text>
-    </View>
-
-    <View style={styles.converterRow}>
-      <Text style={styles.label}>Feet</Text>
-      <TextInput style={styles.input} keyboardType="numeric" />
-      <Text style={styles.shortForm}>ft</Text>
-    </View>
-
-    <View style={styles.converterRow}>
-      <Text style={styles.label}>Inch</Text>
-      <TextInput style={styles.input} keyboardType="numeric" />
-      <Text style={styles.shortForm}>in</Text>
-    </View>
-
-    <View style={styles.converterRow}>
-      <Text style={styles.label}>Kilometer</Text>
-      <TextInput style={styles.input} keyboardType="numeric" />
-      <Text style={styles.shortForm}>km</Text>
-    </View>
-
-    <View style={styles.converterRow}>
-      <Text style={styles.label}>Yard</Text>
-      <TextInput style={styles.input} keyboardType="numeric" />
-      <Text style={styles.shortForm}>yd</Text>
-    </View>
-
-    <View style={styles.converterRow}>
-      <Text style={styles.label}>Meter</Text>
-      <TextInput style={styles.input} keyboardType="numeric" />
-      <Text style={styles.shortForm}>m</Text>
-    </View>
-
-    <View style={styles.converterRow}>
-      <Text style={styles.label}>Mile</Text>
-      <TextInput style={styles.input} keyboardType="numeric" />
-      <Text style={styles.shortForm}>mi</Text>
-    </View>
-
-    <View style={styles.buttonContainer}>
-      <View style={{flex: 2}}/>
-      <View style={styles.buttonWrapper}>
-          <Pressable style={styles.button}onPress={() => {}}>
+      <View style={styles.buttonContainer}>
+        <View style={{flex: 2}} />
+        <View style={{flex: 2}}>
+          <Pressable style={styles.button} onPress={() => setValues(defaultValues)}>
             <Text style={styles.buttonText}>Clear</Text>
           </Pressable>
         </View>
-      <View style={{flex: 1}}/>
-    </View>
-  </ScrollView>
-  )
+        <View style={{flex: 1}} />
+      </View>
+    </ScrollView>
+  );
 }
-
-export default Length
 
 const styles = StyleSheet.create({
   container: {
@@ -80,12 +113,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#466DD8',
     textAlign: 'center',
-    marginVertical:30
+    marginVertical: 20,
   },
   converterRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 25,
+    marginBottom: 15,
   },
   label: {
     flex: 2,
@@ -99,7 +132,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     color: '#fff',
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
     backgroundColor: '#333',
   },
   shortForm: {
@@ -113,11 +146,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     alignItems: 'center',
   },
-  buttonWrapper: {
-    flex:2,
-  },
   button: {
-    marginHorizontal: -10,
+    marginHorizontal: -20,
     borderRadius:5,
     borderWidth:1, 
     height: 40,
@@ -128,6 +158,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize:18,
-  }
+    fontSize: 18,
+  },
 });
+
+export default Length;
