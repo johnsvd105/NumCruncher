@@ -2,31 +2,17 @@ import { View, Text,TextInput, StyleSheet, ScrollView, Pressable } from 'react-n
 import React from 'react'
 import { useState } from 'react'
 import { formatValue } from '../_utils/general'
+import { acceptedLengths } from '../_utils/constants'
+import { lengthConversions } from '../_utils/constants'
 
 
 const Length= () => {
+  //have these on another page for simplicity 
+  const defaultValues = acceptedLengths;
 
-  const defaultValues = {
-    centimeter: '',
-    decimeter: '',
-    feet: '',
-    inch: '',
-    kilometer: '',
-    yard: '',
-    meter: '',
-    mile: '',
-  }
+  //have these on another page for simplicity 
+  const conversions = lengthConversions;
 
-  const conversions = {
-    centimeter: 'decimeter/10 feet/30.48 inch/2.54 kilometer/100000 yard/91.44 meter/100 mile/160934.4',
-    decimeter: 'centimeter*10 feet/3.048 inch*3.937 kilometer/0.0001 yard/9.144 meter/10 mile/16093.44',
-    feet: '',
-    inch: '',
-    kilometer: '',
-    yard: '',
-    meter: '',
-    mile: '',
-  }
 
   const [values, setValues] = useState(defaultValues);
   const convertValues = (fieldName, value) => {
@@ -132,7 +118,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     color: '#fff',
-    paddingHorizontal: 20,
+    paddingHorizontal: 30,
     backgroundColor: '#333',
   },
   shortForm: {
@@ -145,6 +131,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 20,
     alignItems: 'center',
+    marginRight: 10,
   },
   button: {
     marginHorizontal: -20,
